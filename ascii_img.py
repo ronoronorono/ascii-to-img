@@ -12,8 +12,6 @@ dark       = 0
 
 
 def closest_color(value):
-    #supondo q todos os valores >=0
-
     a = abs(light - value)
     b = abs(lightgrey - value)
     c = abs(mediumgrey - value)
@@ -43,51 +41,14 @@ def is_valid_colour(pixel):
     except:
         return False
  
-def valida(pixel):
+def validate(pixel):
     if is_valid_colour(pixel):
         return pixel
     else:
         soma = sum(pixel)
         media = sum(pixel)//len(pixel)
-        #pixelaprox = closest_color(media)
 
         return tuple(3*[closest_color(media)])    
-
-def parseImgB(img):
-
-    points={tuple(3*[light]):[],
-           tuple(3*[lightgrey]):[],
-           tuple(3*[mediumgrey]):[],
-           tuple(3*[darkgrey]):[],
-           tuple(3*[dark]):[]}
-    
-    for x in range(img.width):
-        for y in range(img.height):
-            p = img.getpixel((x,y))
-            pi = valida(p)
-            points[pi].append((x,y))
-            #d.point((x,y),(n,n,n))
-            #img.putpixel((x,y),(n,n,n))
-
-   
-    d = ImageDraw.Draw(img)
-
-    #drawing all light points:
-    d.point(points[tuple(3*[light])],tuple(3*[light]))
-
-    #drawing all lightgrey points:
-    d.point(points[tuple(3*[lightgrey])],tuple(3*[lightgrey]))
-
-    #drawing all mediumgrey points:
-    d.point(points[tuple(3*[mediumgrey])],tuple(3*[mediumgrey]))
-
-    #drawing all darkgrey points:
-    d.point(points[tuple(3*[darkgrey])],tuple(3*[darkgrey]))
-
-    #drawing all dark points:
-    d.point(points[tuple(3*[dark])],tuple(3*[dark]))
-
-  #  img.save("tomReduzido.jpg")
 
 
 def runtime(func, *args):
@@ -95,7 +56,7 @@ def runtime(func, *args):
     func(*args)
     end = time.time() - i
 
-    print("Tempo da operação: "+str(end))
+    print("runtime: "+str(end))
 
 
 def pixel_to_char(p):
@@ -121,7 +82,7 @@ def pixel_to_char(p):
     return equivalencia[p[0]]
                     
 
-def img_to_ascii_corzinha(img,filename):
+def img_to_ascii(img,filename):
     with open (filename, 'w', encoding="utf-8") as f:
         w = 1
         i = 9617
@@ -145,7 +106,7 @@ def img_to_ascii_corzinha(img,filename):
         for y in range(img.height):
             for x in range(img.width):
                 pi = img.getpixel((x,y))
-                p = valida(pi)
+                p = validate(pi)
                
                 if w == img.width:
                     w = 1
@@ -157,10 +118,6 @@ def img_to_ascii_corzinha(img,filename):
 
         f.write("\n</pre>\n</font>\n</body>\n</html>")
 
-def print_l(l):
-    for n in l:
-        print(n)
-        
 def read_by_block(img, filename, block_height, block_length):
     with open (filename, 'w', encoding="utf-8") as f:
         w = 1
@@ -195,13 +152,13 @@ def read_by_block(img, filename, block_height, block_length):
         while bx < max_bx:
             x = bx % block_length + (incx * block_length)
             y = ((bx-auxy)//block_length) + (incy * block_height)
-            pi = valida(img.getpixel((x,y)))
+            pi = validate(img.getpixel((x,y)))
             bsum += pi[0]
             bx += 1
             if bx % (block_length * block_height) == 0:
                 avg = bsum//(block_length * block_height)
                 bsum = 0
-                imgstr += equivalencia[valida([avg]*3)[0]]
+                imgstr += equivalencia[validate([avg]*3)[0]]
                 auxy += (block_length * block_height)
                 incx = incx+1 if bx % ((block_length * block_height) * (t_imgw//block_length)) else 0
                 if  bx % (t_imgw * block_height) == 0:
@@ -227,12 +184,12 @@ def cls():
     else:
         os.system('cls')
 
-def escolha():
+def retry():
     while(True):
-        escolha = input("Deseja realizar outra operacao? (S/N)")
-        if escolha == 'N' or escolha == 'n':
+        c = input("Deseja realizar outra operacao? (S/N)")
+        if c == 'N' or c == 'n':
             return False
-        elif escolha == 'S' or escolha == 's':
+        elif c == 'S' or c == 's':
             return True
 
 
@@ -243,40 +200,40 @@ while(rode):
     cls()
     tudo = os.listdir()
     i = time.time()
-    print("1- Converter nova imagem (multiplicador)")
-    print("2- Converter nova imagem (bloco)")
-    print("3- Listar diretório")
-    print("4- Sair")
+    print("1- Convert new image by rescaling")
+    print("2- Convert new image by reading in blocks")
+    print("3- Show this directory")
+    print("4- Exit")
     print(30*"=")
-    opcao = input("Escolha a opcao: ")
+    opcao = input("Choose option: ")
     if opcao == "1":
-        path = input("Digite o caminho da imagem:\n")
+        path = input("Enter relative image path:\n")
         if (path in tudo):
             img = Image.open(path).convert("RGB")
             w = img.width
             h = img.height
-            x = float(input("multiplicador:\n"))
+            x = float(input("rescale factor:\n"))
             img = img.resize((int(w*x),int(h*x)))
-            print("Convertendo imagem (MULTIPLICADOR)")
-            runtime(img_to_ascii_corzinha,img,tira_extensao(path)+"mult.html")
+            print("Converting image")
+            runtime(img_to_ascii,img,tira_extensao(path)+"mult.html")
             print(30*"=")
-            rode = escolha()
+            rode = retry()
     elif opcao == "2":
-        path = input("Digite o caminho da imagem:\n")
+        path = input("Enter relative image path:\n")
         if (path in tudo):
             img = Image.open(path).convert("RGB")
-            bh = int(input("altura do bloco(pixels):\n"))
-            bl = int(input("largura do bloco(pixels):\n"))
-            print("Convertendo imagem (BLOCO)")
+            bh = int(input("block height(pixels):\n"))
+            bl = int(input("block width(pixels):\n"))
+            print("Converting image")
             runtime(read_by_block,img,tira_extensao(path)+"block.html",bh,bl)
             print(30*"=")
-            rode = escolha()
+            rode = retry()
     elif opcao == "3":
         cls()
-        print("Diretorio atual: "+os.getcwd() + "\\\n")
+        print("Current dir: "+os.getcwd() + "\\\n")
         for path in tudo:
             print(path)
-        input("\nPressione ENTER para voltar")
+        input("\nPress ENTER to return")
     elif opcao == "4":
         rode = False
     else:
