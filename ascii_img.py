@@ -186,10 +186,10 @@ def cls():
 
 def retry():
     while(True):
-        c = input("Deseja realizar outra operacao? (S/N)")
+        c = input("Would you like to perform another operation? (Y/N)")
         if c == 'N' or c == 'n':
             return False
-        elif c == 'S' or c == 's':
+        elif c == 'Y' or c == 'y':
             return True
 
 
@@ -212,7 +212,7 @@ while(rode):
             img = Image.open(path).convert("RGB")
             w = img.width
             h = img.height
-            x = float(input("rescale factor:\n"))
+            x = float(input("rescale factor(the dimensions of the img will be multiplied by this value):\n"))
             img = img.resize((int(w*x),int(h*x)))
             print("Converting image")
             runtime(img_to_ascii,img,tira_extensao(path)+"mult.html")
